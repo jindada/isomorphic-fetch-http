@@ -1,0 +1,46 @@
+{
+  "name": "isomorphic-fetch-http",
+  "version": "0.1.2",
+  "description": "react fetch by isomorphic-fetch",
+  "main": "lib/isomorphic-fetch-http.js",
+  "scripts": {
+    "clean": "rimraf lib",
+    "prebuild": "npm run lint && npm run clean",
+    "build": "babel src --out-dir lib --extensions .js,.es6 --copy-files",
+    "lint": "eslint --color --config .eslintrc src/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jindada/isomorphic-fetch-http.git"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "fetch",
+    "ajax",
+    "isomorphic-fetch"
+  ],
+  "author": "jzs0914@126.com",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.14.0",
+    "babel-eslint": "^7.2.2",
+    "babel-loader": "^6.2.8",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "eslint": "3.1.1",
+    "eslint-config-standard": "5.3.5",
+    "eslint-config-standard-react": "3.0.0",
+    "eslint-plugin-babel": "^3.3.0",
+    "eslint-plugin-promise": "2.0.0",
+    "eslint-plugin-react": "5.2.2",
+    "eslint-plugin-standard": "2.0.0",
+    "rimraf": "^2.5.4"
+  },
+  "dependencies": {
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
