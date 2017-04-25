@@ -36,10 +36,12 @@ const $http = (url, option = {}, header = {}) => {
     .then((data) => data);   
 };
 
-export default {
-  '$get': (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, header)),
-  '$post': (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: stringify(param) }, header)),
-  '$put': (url, param = {}, header = {}) => ($http(url, { method: 'PUT', body: stringify(param) }, header)),
-  '$delete': (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, { method: 'DELETE' }, header)),
-  '$option': (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: JSON.stringify(param) }, {...header, ...{ "Content-Type": "application/json" }})),
-};
+export const $get = (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, header));
+
+export const $post = (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: stringify(param) }, header));
+
+export const $put = (url, param = {}, header = {}) => ($http(url, { method: 'PUT', body: stringify(param) }, header));
+
+export const $delete = (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, { method: 'DELETE' }, header));
+
+export const $option = (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: JSON.stringify(param) }, {...header, ...{ "Content-Type": "application/json" }}));
