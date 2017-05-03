@@ -19,10 +19,9 @@ import { $get, $post, $put, $delete, $option } from 'isomorphic-fetch-http'
 
 ## Links
 
-- [Home page](https://github.com/jindada/react-http)
 - [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
 
 
 ## Contributing
 
-You can submit any ideas as [pull requests](https://github.com/jindada/isomorphic-fetch-http) or as a [GitLab issue](https://github.com/jindada/isomorphic-fetch-http/issues).
+You can submit any ideas as [pull requests](https://github.com/jindada/isomorphic-fetch-http) or as a [Github issue](https://github.com/jindada/isomorphic-fetch-http/issues).
