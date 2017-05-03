@@ -16,10 +16,11 @@ const httpConfig = {
  * Requests a URL, returning a promise.
  * @param  {string} url       The URL we want to request
  * @param  {object} [options] The options we want to pass to "fetch"
+ * @param  {object} header    The request header
  * @return {object}           An object containing either "data" or "err"
  */
 const $http = (url, option = {}, header = {}) => {
-  return fetch(url, { ...httpConfig, headers: { ...httpConfig.headers, ...header }, ...option })
+  return fetch(header.prefix ? `${header.prefix}${url}` : url, { ...httpConfig, headers: { ...httpConfig.headers, ...header }, ...option })
     .then((resp) => {
       if (resp.status >= 400) {
         throw new Error('400+Error');

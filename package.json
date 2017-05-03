@@ -1,6 +1,6 @@
 {
   "name": "isomorphic-fetch-http",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "react fetch by isomorphic-fetch",
   "main": "lib/isomorphic-fetch-http.js",
   "scripts": {
