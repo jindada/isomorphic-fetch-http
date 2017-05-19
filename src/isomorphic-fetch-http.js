@@ -56,7 +56,7 @@ class _http {
   }
 
   get(url, param, header = {}) {
-    return this[http](`${url}?${stringify(param)}`, header);
+    return this[http](`${url}?${stringify(param)}`, {}, header);
   }
 
   post(url, param, header = {}) {
