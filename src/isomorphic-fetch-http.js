@@ -17,11 +17,6 @@ class _http {
     this.prefix = "";
     this.header = {};
     this.fn = (data) => data;    
-    // this.$get = this.$get.bind(this);
-    // this.$post = this.$post.bind(this);
-    // this.$put = this.$put.bind(this);
-    // this.$delete = this.$delete.bind(this);
-    // this.$option = this.$option.bind(this);
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -60,24 +55,24 @@ class _http {
     this.fn = fn;
   }
 
-  get(url, param) {
-    return this[http](`${url}?${stringify(param)}`);
+  get(url, param, header = {}) {
+    return this[http](`${url}?${stringify(param)}`, header);
   }
 
-  post(url, param) {
-    return this[http](url, { method: 'POST', body: stringify(param) });
+  post(url, param, header = {}) {
+    return this[http](url, {method: 'POST', body: stringify(param)}, header);
   }
 
-  put(url, param) {
-    return this[http](url, { method: 'PUT', body: stringify(param) });
+  put(url, param, header = {}) {
+    return this[http](url, {method: 'PUT', body: stringify(param)}, header);
   }
 
-  delete(url, param) {
-    return this[http](`${url}?${stringify(param)}`, { method: 'DELETE' });
+  delete(url, param, header = {}) {
+    return this[http](`${url}?${stringify(param)}`, {method: 'DELETE'}, header);
   }
   
-  option(url, param) {
-    return this[http](url, { method: 'POST', body: JSON.stringify(param) }, {"Content-Type": "application/json"});
+  option(url, param = {}, header) {
+    return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
   }
 }
 
