@@ -29,9 +29,9 @@ var http = Symbol('http');
  * @return {object}           An object containing either "data" or "err"
  */
 
-var _http = function () {
-  function _http() {
-    _classCallCheck(this, _http);
+var $http = function () {
+  function $http() {
+    _classCallCheck(this, $http);
 
     // bind this
     this.prefix = "";
@@ -55,9 +55,11 @@ var _http = function () {
       credentials: "include",
       client_max_body_size: "2048m"
     };
+
+    console.log(this);
   }
 
-  _createClass(_http, [{
+  _createClass($http, [{
     key: http,
     value: function value(url) {
       var option = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -113,11 +115,11 @@ var _http = function () {
   }, {
     key: 'option',
     value: function option(url, param) {
-      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, { "Content-Type": "application/json" });
+      return $http(url, { method: 'POST', body: JSON.stringify(param) }, { "Content-Type": "application/json" });
     }
   }]);
 
-  return _http;
+  return $http;
 }();
 
-exports.default = new _http();
+exports.default = new $http();

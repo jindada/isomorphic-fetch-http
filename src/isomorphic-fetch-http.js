@@ -11,17 +11,17 @@ const http = Symbol('http');
  * @param  {object} header    The request header
  * @return {object}           An object containing either "data" or "err"
  */
-class $http {
-  contructor() {
+class _http {
+  constructor() {
     // bind this
     this.prefix = "";
     this.header = {};
     this.fn = (data) => data;    
-    this.$get = this.$get.bind(this);
-    this.$post = this.$post.bind(this);
-    this.$put = this.$put.bind(this);
-    this.$delete = this.$delete.bind(this);
-    this.$option = this.$option.bind(this);
+    // this.$get = this.$get.bind(this);
+    // this.$post = this.$post.bind(this);
+    // this.$put = this.$put.bind(this);
+    // this.$delete = this.$delete.bind(this);
+    // this.$option = this.$option.bind(this);
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -54,31 +54,31 @@ class $http {
     .then((data) => data);  
   }
 
-  setup(prefix, header = {}, fn) {
+  setup({prefix, header = {}, fn}) {
     this.prefix = prefix;
     this.header = header;
     this.fn = fn;
   }
 
-  $get(url, param) {
+  get(url, param) {
     return this[http](`${url}?${stringify(param)}`);
   }
 
-  $post(url, param) {
+  post(url, param) {
     return this[http](url, { method: 'POST', body: stringify(param) });
   }
 
-  $put(url, param) {
+  put(url, param) {
     return this[http](url, { method: 'PUT', body: stringify(param) });
   }
 
-  $delete(url, param) {
+  delete(url, param) {
     return this[http](`${url}?${stringify(param)}`, { method: 'DELETE' });
   }
-
-  $option(url, param) {
-    return $http(url, { method: 'POST', body: JSON.stringify(param) }, {"Content-Type": "application/json"});
+  
+  option(url, param) {
+    return this[http](url, { method: 'POST', body: JSON.stringify(param) }, {"Content-Type": "application/json"});
   }
 }
 
-export default new $http();
+export default new _http();
