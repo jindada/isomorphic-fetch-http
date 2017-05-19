@@ -1,17 +1,9 @@
 import fetch from 'isomorphic-fetch';
 import { stringify } from 'qs';
 
-const httpConfig = {
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Max-Age": "86400",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
-    "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type",
-  },
-  credentials: "include",
-  client_max_body_size: "2048m"
-};
+const config = Symbol('config');
+const http = Symbol('http');
+
 /*
  * Requests a URL, returning a promise.
  * @param  {string} url       The URL we want to request
@@ -19,8 +11,32 @@ const httpConfig = {
  * @param  {object} header    The request header
  * @return {object}           An object containing either "data" or "err"
  */
-const $http = (url, option = {}, header = {}) => {
-  return fetch(header.prefix ? `${header.prefix}${url}` : url, { ...httpConfig, headers: { ...httpConfig.headers, ...header }, ...option })
+class $http {
+  contructor() {
+    // bind this
+    this.prefix = "";
+    this.header = {};
+    this.fn = (data) => data;    
+    this.$get = this.$get.bind(this);
+    this.$post = this.$post.bind(this);
+    this.$put = this.$put.bind(this);
+    this.$delete = this.$delete.bind(this);
+    this.$option = this.$option.bind(this);
+    this[config] = {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Max-Age": "86400",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+        "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type",
+      },
+      credentials: "include",
+      client_max_body_size: "2048m"
+    };
+  }
+
+  [http](url, option = {}, header = {}) {
+    return fetch(`${this.prefix}${url}`, { ...this[config], headers: { ...this[config].headers, ...this.header, ...header }, ...option })
     .then((resp) => {
       if (resp.status >= 400) {
         throw new Error('400+Error');
@@ -34,15 +50,35 @@ const $http = (url, option = {}, header = {}) => {
         throw new Error('JSONError');
       }
     })
-    .then((data) => data);   
-};
+    .then(this.fn)
+    .then((data) => data);  
+  }
 
-export const $get = (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, header));
+  setup(prefix, header = {}, fn) {
+    this.prefix = prefix;
+    this.header = header;
+    this.fn = fn;
+  }
 
-export const $post = (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: stringify(param) }, header));
+  $get(url, param) {
+    return this[http](`${url}?${stringify(param)}`);
+  }
 
-export const $put = (url, param = {}, header = {}) => ($http(url, { method: 'PUT', body: stringify(param) }, header));
+  $post(url, param) {
+    return this[http](url, { method: 'POST', body: stringify(param) });
+  }
 
-export const $delete = (url, param = {}, header = {}) => ($http(`${url}?${stringify(param)}`, { method: 'DELETE' }, header));
+  $put(url, param) {
+    return this[http](url, { method: 'PUT', body: stringify(param) });
+  }
 
-export const $option = (url, param = {}, header = {}) => ($http(url, { method: 'POST', body: JSON.stringify(param) }, {...header, ...{ "Content-Type": "application/json" }}));
+  $delete(url, param) {
+    return this[http](`${url}?${stringify(param)}`, { method: 'DELETE' });
+  }
+
+  $option(url, param) {
+    return $http(url, { method: 'POST', body: JSON.stringify(param) }, {"Content-Type": "application/json"});
+  }
+}
+
+export default new $http();
