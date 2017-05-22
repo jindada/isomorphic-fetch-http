@@ -16,7 +16,7 @@ class _http {
     // bind this
     this.prefix = "";
     this.header = {};
-    this.fn = (data) => data;    
+    this.exception = [];    
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -45,14 +45,20 @@ class _http {
         throw new Error('JSONError');
       }
     })
-    .then(this.fn)
-    .then((data) => data);  
+    .then(({status, code, data, message}) => {
+      if (status === false) {
+        if (this.exception.indexOf(code) > -1) {
+          throw code;
+        }
+      }
+      return {status, data, message};
+    });
   }
 
-  setup({prefix, header = {}, fn}) {
+  setup({prefix, header = {}, exception}) {
     this.prefix = prefix;
     this.header = header;
-    this.fn = fn;
+    this.exception = exception;
   }
 
   get(url, param, header = {}) {

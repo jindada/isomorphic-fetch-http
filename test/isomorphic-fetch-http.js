@@ -29,9 +29,9 @@ var http = Symbol('http');
  * @return {object}           An object containing either "data" or "err"
  */
 
-var $http = function () {
-  function $http() {
-    _classCallCheck(this, $http);
+var _http = function () {
+  function _http() {
+    _classCallCheck(this, _http);
 
     // bind this
     this.prefix = "";
@@ -39,11 +39,6 @@ var $http = function () {
     this.fn = function (data) {
       return data;
     };
-    // this.$get = this.$get.bind(this);
-    // this.$post = this.$post.bind(this);
-    // this.$put = this.$put.bind(this);
-    // this.$delete = this.$delete.bind(this);
-    // this.$option = this.$option.bind(this);
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -55,11 +50,9 @@ var $http = function () {
       credentials: "include",
       client_max_body_size: "2048m"
     };
-
-    console.log(this);
   }
 
-  _createClass($http, [{
+  _createClass(_http, [{
     key: http,
     value: function value(url) {
       var option = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -95,31 +88,42 @@ var $http = function () {
   }, {
     key: 'get',
     value: function get(url, param) {
-      return this[http](url + '?' + (0, _qs.stringify)(param));
+      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this[http](url + '?' + (0, _qs.stringify)(param), {}, header);
     }
   }, {
     key: 'post',
     value: function post(url, param) {
-      return this[http](url, { method: 'POST', body: (0, _qs.stringify)(param) });
+      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this[http](url, { method: 'POST', body: (0, _qs.stringify)(param) }, header);
     }
   }, {
     key: 'put',
     value: function put(url, param) {
-      return this[http](url, { method: 'PUT', body: (0, _qs.stringify)(param) });
+      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this[http](url, { method: 'PUT', body: (0, _qs.stringify)(param) }, header);
     }
   }, {
     key: 'delete',
     value: function _delete(url, param) {
-      return this[http](url + '?' + (0, _qs.stringify)(param), { method: 'DELETE' });
+      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this[http](url + '?' + (0, _qs.stringify)(param), { method: 'DELETE' }, header);
     }
   }, {
     key: 'option',
-    value: function option(url, param) {
-      return $http(url, { method: 'POST', body: JSON.stringify(param) }, { "Content-Type": "application/json" });
+    value: function option(url) {
+      var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var header = arguments[2];
+
+      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, _extends({}, header, { "Content-Type": "application/json" }));
     }
   }]);
 
-  return $http;
+  return _http;
 }();
 
-exports.default = new $http();
+exports.default = new _http();
