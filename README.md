@@ -35,7 +35,7 @@ return http.post('url', param);
 // put方法 一般用于数据修改
 // @param {Object} param
 // @return {Object} {status, data, message}
-// return http.put('url', param);
+return http.put('url', param);
 
 // delete方法 一般用于数据删除
 // @param {Object} param
