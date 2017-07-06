@@ -76,8 +76,17 @@ class _http {
   delete(url, param, header = {}) {
     return this[http](`${url}?${stringify(param)}`, {method: 'DELETE'}, header);
   }
-  
+
+  options(url, param, header = {}) {
+    return this[http](url, {method: 'OPTIONS'}, header);
+  }
+
   option(url, param = {}, header) {
+    console.log("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
+    return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
+  }
+
+  json(url, param = {}, header) {
     return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
   }
 }
