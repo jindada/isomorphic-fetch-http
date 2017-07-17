@@ -16,6 +16,10 @@ class _http {
     // bind this
     this.prefix = "";
     this.header = {};
+    this.filter = {
+      before: () => false,
+      after: () => false,
+    };
     this.exception = [];    
     this[config] = {
       headers: {
@@ -31,6 +35,7 @@ class _http {
   }
 
   [http](url, option = {}, header = {}) {
+    this.filter.before();
     return fetch(`${this.prefix}${url}`, { ...this[config], headers: { ...this[config].headers, ...this.header, ...header }, ...option })
     .then((resp) => {
       if (resp.status >= 400) {
@@ -46,6 +51,7 @@ class _http {
       }
     })
     .then(({status, code, data, message}) => {
+      this.filter.after();
       if (status === false) {
         if (this.exception.indexOf(code) > -1) {
           throw code;
@@ -55,10 +61,15 @@ class _http {
     });
   }
 
-  setup({prefix, header = {}, exception}) {
+  setup({prefix, header = {}, filter, exception}) {
     this.prefix = prefix;
     this.header = header;
+    this.filter = filter;
     this.exception = exception;
+  }
+
+  setHeader(header = {}) {
+    this.header = {...this.header, ...header};
   }
 
   get(url, param, header = {}) {
