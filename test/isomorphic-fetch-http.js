@@ -36,9 +36,15 @@ var _http = function () {
     // bind this
     this.prefix = "";
     this.header = {};
-    this.fn = function (data) {
-      return data;
+    this.filter = {
+      before: function before() {
+        return false;
+      },
+      after: function after() {
+        return false;
+      }
     };
+    this.exception = [];
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -55,9 +61,12 @@ var _http = function () {
   _createClass(_http, [{
     key: http,
     value: function value(url) {
+      var _this = this;
+
       var option = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+      this.filter.before && this.filter.before();
       return (0, _isomorphicFetch2.default)('' + this.prefix + url, _extends({}, this[config], { headers: _extends({}, this[config].headers, this.header, header) }, option)).then(function (resp) {
         if (resp.status >= 400) {
           throw new Error('400+Error');
@@ -69,21 +78,44 @@ var _http = function () {
         } catch (e) {
           throw new Error('JSONError');
         }
-      }).then(this.fn).then(function (data) {
-        return data;
+      }).then(function (_ref) {
+        var status = _ref.status,
+            code = _ref.code,
+            data = _ref.data,
+            message = _ref.message;
+
+        _this.filter.after && _this.filter.after({ status: status, code: code, data: data, message: message });
+        if (status === false) {
+          if (_this.exception.indexOf(code) > -1) {
+            throw Error(code);
+          }
+        }
+        return { status: status, data: data, message: message };
       });
     }
   }, {
     key: 'setup',
-    value: function setup(_ref) {
-      var prefix = _ref.prefix,
-          _ref$header = _ref.header,
-          header = _ref$header === undefined ? {} : _ref$header,
-          fn = _ref.fn;
+    value: function setup(_ref2) {
+      var _ref2$prefix = _ref2.prefix,
+          prefix = _ref2$prefix === undefined ? "" : _ref2$prefix,
+          _ref2$header = _ref2.header,
+          header = _ref2$header === undefined ? {} : _ref2$header,
+          _ref2$filter = _ref2.filter,
+          filter = _ref2$filter === undefined ? this.filter : _ref2$filter,
+          _ref2$exception = _ref2.exception,
+          exception = _ref2$exception === undefined ? [] : _ref2$exception;
 
       this.prefix = prefix;
       this.header = header;
-      this.fn = fn;
+      this.filter = filter;
+      this.exception = exception;
+    }
+  }, {
+    key: 'setHeader',
+    value: function setHeader() {
+      var header = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      this.header = _extends({}, this.header, header);
     }
   }, {
     key: 'get',
@@ -114,8 +146,24 @@ var _http = function () {
       return this[http](url + '?' + (0, _qs.stringify)(param), { method: 'DELETE' }, header);
     }
   }, {
+    key: 'options',
+    value: function options(url, param) {
+      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this[http](url, { method: 'OPTIONS' }, header);
+    }
+  }, {
     key: 'option',
     value: function option(url) {
+      var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var header = arguments[2];
+
+      console.error("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
+      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, _extends({}, header, { "Content-Type": "application/json" }));
+    }
+  }, {
+    key: 'json',
+    value: function json(url) {
       var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var header = arguments[2];
 

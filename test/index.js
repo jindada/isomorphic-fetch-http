@@ -1,17 +1,19 @@
 import $http from './isomorphic-fetch-http';
-
 $http.setup({
-  prefix: '/123',
-  header: {"123123": "asda"},
-  fn: (data) => data
+  prefix: '19634',
+  header: {},
+  // filter: {
+  //   before: () => {
+  //     alert('before');
+  //   },
+  //   after: (data) => {
+  //     alert('after');
+  //   }
+  // }
 });
 
-$http.setup({
-  prefix: '/123',
-  header: {"456456": "3453453"},
-  fn: (data) => data
+$http.setHeader({
+  token: 'asdasd'
 });
 
-$http.get("/asd");
-
-
+$http.get("/add?currentPage=1");

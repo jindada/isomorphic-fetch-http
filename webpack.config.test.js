@@ -19,8 +19,8 @@ module.exports = {
         inline: true,
         stats: { colors: true },
         proxy: {
-            '/api': {
-              target: 'http://127.0.0.1:9001',
+            '/19634': {
+              target: 'http://rapapi.org/mockjsData/',
               changeOrigin: true
             }
          }

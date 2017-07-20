@@ -35,7 +35,7 @@ class _http {
   }
 
   [http](url, option = {}, header = {}) {
-    this.filter.before();
+    this.filter.before && this.filter.before();
     return fetch(`${this.prefix}${url}`, { ...this[config], headers: { ...this[config].headers, ...this.header, ...header }, ...option })
     .then((resp) => {
       if (resp.status >= 400) {
@@ -51,17 +51,17 @@ class _http {
       }
     })
     .then(({status, code, data, message}) => {
-      this.filter.after();
+      this.filter.after && this.filter.after({status, code, data, message});
       if (status === false) {
         if (this.exception.indexOf(code) > -1) {
-          throw code;
+          throw Error(code);
         }
       }
       return {status, data, message};
     });
   }
 
-  setup({prefix, header = {}, filter, exception}) {
+  setup({prefix = "", header = {}, filter = this.filter, exception = []}) {
     this.prefix = prefix;
     this.header = header;
     this.filter = filter;
@@ -93,7 +93,7 @@ class _http {
   }
 
   option(url, param = {}, header) {
-    console.log("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
+    console.error("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
     return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
   }
 
