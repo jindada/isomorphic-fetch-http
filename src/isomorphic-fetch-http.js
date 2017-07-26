@@ -16,11 +16,8 @@ class _http {
     // bind this
     this.prefix = "";
     this.header = {};
-    this.filter = {
-      before: () => false,
-      after: () => false,
-    };
-    this.exception = [];    
+    this.filter = () => false;
+    this.callback = _ => _;
     this[config] = {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -35,7 +32,7 @@ class _http {
   }
 
   [http](url, option = {}, header = {}) {
-    this.filter.before && this.filter.before();
+    this.filter && this.filter();
     return fetch(`${this.prefix}${url}`, { ...this[config], headers: { ...this[config].headers, ...this.header, ...header }, ...option })
     .then((resp) => {
       if (resp.status >= 400) {
@@ -50,22 +47,14 @@ class _http {
         throw new Error('JSONError');
       }
     })
-    .then(({status, code, data, message}) => {
-      this.filter.after && this.filter.after({status, code, data, message});
-      if (status === false) {
-        if (this.exception.indexOf(code) > -1) {
-          throw Error(code);
-        }
-      }
-      return {status, data, message};
-    });
+    .then(this.callback);
   }
 
-  setup({prefix = "", header = {}, filter = this.filter, exception = []}) {
+  setup({prefix = "", header = {}, filter = this.filter, callback = this.callback}) {
     this.prefix = prefix;
     this.header = header;
     this.filter = filter;
-    this.exception = exception;
+    this.callback = callback;
   }
 
   setHeader(header = {}) {
@@ -90,11 +79,6 @@ class _http {
 
   options(url, param, header = {}) {
     return this[http](url, {method: 'OPTIONS'}, header);
-  }
-
-  option(url, param = {}, header) {
-    console.error("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
-    return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
   }
 
   json(url, param = {}, header) {

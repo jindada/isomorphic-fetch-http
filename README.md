@@ -15,23 +15,12 @@ npm install isomorphic-fetch-http --save
 ```javascript
 import { http } from 'isomorphic-fetch-http'
 
-// isomorphic-fetch-http 要求数据返回格式为
-{
-  status: true,            // 请求状态 true／false
-  code: 'INVALIDError',    // 发生特定异常返回的错误码 与 exception 对应
-  data: {} / []            // 请求状态为 true 时返回的数据体 
-  message                  // 请求状态为 false 时返回的详细错误信息
-}
-
 // 全局配置
 http.setup({
   prefix: '/api',               // url 前缀
   header: {},                   // 自定义请求头
-  filter: {                     // 自定义过滤器 before 发生在请求执行之前 after 发生在请求执行之后
-    before: () => false,
-    after: () => false
-  }
-  exception: ['INVALIDError']   // 自定义捕获类型
+  filter: () => false           // 自定义过滤器 发生在请求执行之前
+  callback: data => data         // 数据请求成功之后的回调函数
 });
 
 http.setHeader({                // 覆盖/新增 请求头 
