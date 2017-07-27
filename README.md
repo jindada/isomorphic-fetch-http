@@ -20,7 +20,7 @@ http.setup({
   prefix: '/api',               // url 前缀
   header: {},                   // 自定义请求头
   filter: () => false           // 自定义过滤器 发生在请求执行之前
-  callback: data => data         // 数据请求成功之后的回调函数
+  callback: data => data        // 数据请求成功之后的回调函数
 });
 
 http.setHeader({                // 覆盖/新增 请求头 
@@ -56,13 +56,6 @@ return http.delete('url', param, header);
 // @param {Object} header
 // @return {Object} {status, data, message}
 return http.json('url', param, header);
-
-// option方法 本质是请求头为 "Content-Type": "application/json" 的post方法
-// WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除
-// @param {Object} param
-// @param {Object} header
-// @return {Object} {status, data, message}
-return http.option('url', param, header);
 
 // options方法 一般用于请求时的预检
 // @param {Object} param
