@@ -1,11 +1,12 @@
-import $http from './isomorphic-fetch-http';
-$http.setup({
-  prefix: '19634',
-  header: {},
+import http from './isomorphic-fetch-http';
+http.setup({
+  prefix: '/19634',
+  headers: {
+    "clent_max_body_size": "1024m"
+  },
+  // filter: ({url, headers, option}) => new Promise((resolve) => {
+  //   resolve({url, headers: {...headers, token: 'asdasd'}, option});
+  // })
 });
 
-$http.setHeader({
-  token: 'asdasd'
-});
-
-$http.get("/add?currentPage=1");
+http.get("/add", {currentPage: 1});

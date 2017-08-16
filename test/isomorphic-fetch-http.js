@@ -16,58 +16,65 @@ var _qs = require('qs');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var config = Symbol('config');
 var http = Symbol('http');
-
-/*
- * Requests a URL, returning a promise.
- * @param  {string} url       The URL we want to request
- * @param  {object} [options] The options we want to pass to "fetch"
- * @param  {object} header    The request header
- * @return {object}           An object containing either "data" or "err"
- */
-
+var defaultHeaders = {
+  "Content-Type": "application/x-www-form-urlencoded",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Max-Age": "86400",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+  "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type"
+  /*
+   * Requests a URL, returning a promise.
+   * @param  {string} url       The URL we want to request
+   * @param  {object} [options] The options we want to pass to "fetch"
+   * @param  {object} headers    The request headers
+   * @return {object}           An object containing either "data" or "err"
+   */
+};
 var _http = function () {
   function _http() {
     _classCallCheck(this, _http);
 
     // bind this
     this.prefix = "";
-    this.header = {};
-    this.filter = {
-      before: function before() {
-        return false;
-      },
-      after: function after() {
-        return false;
-      }
+    this.headers = {};
+    this.filter = function (_) {
+      return new Promise(function (resolve) {
+        return resolve(_);
+      });
     };
-    this.exception = [];
-    this[config] = {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Max-Age": "86400",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
-        "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type"
-      },
-      credentials: "include",
-      client_max_body_size: "2048m"
+    this.callback = function (_) {
+      return _;
     };
+    this.cookies = true;
+    this.option = {};
   }
 
   _createClass(_http, [{
     key: http,
     value: function value(url) {
-      var _this = this;
-
       var option = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      this.filter.before && this.filter.before();
-      return (0, _isomorphicFetch2.default)('' + this.prefix + url, _extends({}, this[config], { headers: _extends({}, this[config].headers, this.header, header) }, option)).then(function (resp) {
+      // url
+      var _url = '' + this.prefix + url;
+      // request headers
+      var _headers = _extends({}, defaultHeaders, this.headers, headers);
+      // fetch option
+      var _option = _extends({}, this.option, {
+        credentials: this.cookies ? "include" : undefined
+      }, option);
+
+      return this.filter({ url: _url, headers: _headers, option: _option }).then(function (_ref) {
+        var u = _ref.url,
+            h = _ref.headers,
+            o = _ref.option;
+        return (0, _isomorphicFetch2.default)(u, _extends({}, o, { headers: h }));
+      }).then(function (resp) {
         if (resp.status >= 400) {
           throw new Error('400+Error');
         }
@@ -78,19 +85,8 @@ var _http = function () {
         } catch (e) {
           throw new Error('JSONError');
         }
-      }).then(function (_ref) {
-        var status = _ref.status,
-            code = _ref.code,
-            data = _ref.data,
-            message = _ref.message;
-
-        _this.filter.after && _this.filter.after({ status: status, code: code, data: data, message: message });
-        if (status === false) {
-          if (_this.exception.indexOf(code) > -1) {
-            throw Error(code);
-          }
-        }
-        return { status: status, data: data, message: message };
+      }).then(this.callback).catch(function (msg) {
+        throw new Error(msg);
       });
     }
   }, {
@@ -98,76 +94,72 @@ var _http = function () {
     value: function setup(_ref2) {
       var _ref2$prefix = _ref2.prefix,
           prefix = _ref2$prefix === undefined ? "" : _ref2$prefix,
-          _ref2$header = _ref2.header,
-          header = _ref2$header === undefined ? {} : _ref2$header,
+          _ref2$headers = _ref2.headers,
+          headers = _ref2$headers === undefined ? this.headers : _ref2$headers,
           _ref2$filter = _ref2.filter,
           filter = _ref2$filter === undefined ? this.filter : _ref2$filter,
-          _ref2$exception = _ref2.exception,
-          exception = _ref2$exception === undefined ? [] : _ref2$exception;
+          _ref2$callback = _ref2.callback,
+          callback = _ref2$callback === undefined ? this.callback : _ref2$callback,
+          _ref2$cookies = _ref2.cookies,
+          cookies = _ref2$cookies === undefined ? this.cookies : _ref2$cookies,
+          option = _objectWithoutProperties(_ref2, ['prefix', 'headers', 'filter', 'callback', 'cookies']);
 
       this.prefix = prefix;
-      this.header = header;
+      this.headers = headers;
       this.filter = filter;
-      this.exception = exception;
+      this.callback = callback;
+      this.cookies = cookies;
+      this.option = option;
     }
   }, {
-    key: 'setHeader',
-    value: function setHeader() {
-      var header = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    key: 'setHeaders',
+    value: function setHeaders() {
+      var headers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      this.header = _extends({}, this.header, header);
+      this.headers = _extends({}, this.headers, headers);
     }
   }, {
     key: 'get',
     value: function get(url, param) {
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this[http](url + '?' + (0, _qs.stringify)(param), {}, header);
+      return this[http](url + '?' + (0, _qs.stringify)(param), {}, headers);
     }
   }, {
     key: 'post',
     value: function post(url, param) {
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this[http](url, { method: 'POST', body: (0, _qs.stringify)(param) }, header);
+      return this[http](url, { method: 'POST', body: (0, _qs.stringify)(param) }, headers);
     }
   }, {
     key: 'put',
     value: function put(url, param) {
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this[http](url, { method: 'PUT', body: (0, _qs.stringify)(param) }, header);
+      return this[http](url, { method: 'PUT', body: (0, _qs.stringify)(param) }, headers);
     }
   }, {
     key: 'delete',
     value: function _delete(url, param) {
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this[http](url + '?' + (0, _qs.stringify)(param), { method: 'DELETE' }, header);
+      return this[http](url + '?' + (0, _qs.stringify)(param), { method: 'DELETE' }, headers);
     }
   }, {
     key: 'options',
     value: function options(url, param) {
-      var header = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this[http](url, { method: 'OPTIONS' }, header);
-    }
-  }, {
-    key: 'option',
-    value: function option(url) {
-      var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var header = arguments[2];
-
-      console.error("WARNING: 在isomorphic-fetch-http 1.0.0版本及以上版本，option方法已经由json方法代替，option方法将在1.1.0版本中去除");
-      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, _extends({}, header, { "Content-Type": "application/json" }));
+      return this[http](url, { method: 'OPTIONS' }, headers);
     }
   }, {
     key: 'json',
     value: function json(url) {
       var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var header = arguments[2];
+      var headers = arguments[2];
 
-      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, _extends({}, header, { "Content-Type": "application/json" }));
+      return this[http](url, { method: 'POST', body: JSON.stringify(param) }, _extends({}, headers, { "Content-Type": "application/json" }));
     }
   }]);
 

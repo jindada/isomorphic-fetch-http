@@ -1,88 +1,108 @@
 import fetch from 'isomorphic-fetch';
 import { stringify } from 'qs';
 
-const config = Symbol('config');
-const http = Symbol('http');
 
+const http = Symbol('http');
+const defaultHeaders = {
+  "Content-Type": "application/x-www-form-urlencoded",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Max-Age": "86400",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+  "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type",
+};
 /*
  * Requests a URL, returning a promise.
  * @param  {string} url       The URL we want to request
  * @param  {object} [options] The options we want to pass to "fetch"
- * @param  {object} header    The request header
+ * @param  {object} headers    The request headers
  * @return {object}           An object containing either "data" or "err"
  */
 class _http {
   constructor() {
     // bind this
     this.prefix = "";
-    this.header = {};
-    this.filter = () => false;
+    this.headers = {};
+    this.filter = _ => new Promise(resolve => resolve(_));
     this.callback = _ => _;
-    this[config] = {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Max-Age": "86400",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
-        "Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type",
-      },
-      credentials: "include",
-      client_max_body_size: "2048m"
+    this.cookies = true;
+    this.option = {};
+  }
+
+  [http](url, option = {}, headers = {}) {
+    // url
+    const _url = `${this.prefix}${url}`;
+    // request headers
+    const _headers = { ...defaultHeaders, ...this.headers, ...headers };
+    // fetch option
+    const _option = {
+      ...this.option,
+      credentials: this.cookies ? "include" : undefined,
+      ...option,
     };
+    
+    return this.filter({url: _url, headers: _headers, option: _option})
+      .then(({url: u, headers: h, option: o}) => fetch(u, {...o, headers: h}))
+      .then((resp) => {
+        if (resp.status >= 400) {
+          throw new Error('400+Error');
+        }
+        return resp;
+      })
+      .then((resp) => {
+        try {
+          return resp.json();
+        } catch (e) {
+          throw new Error('JSONError');
+        }
+      })
+      .then(this.callback)
+      .catch(msg => {
+        throw new Error(msg);
+      });
   }
 
-  [http](url, option = {}, header = {}) {
-    this.filter && this.filter();
-    return fetch(`${this.prefix}${url}`, { ...this[config], headers: { ...this[config].headers, ...this.header, ...header }, ...option })
-    .then((resp) => {
-      if (resp.status >= 400) {
-        throw new Error('400+Error');
-      }
-      return resp;
-    })
-    .then((resp) => {
-      try {
-        return resp.json();
-      } catch (e) {
-        throw new Error('JSONError');
-      }
-    })
-    .then(this.callback);
-  }
-
-  setup({prefix = "", header = {}, filter = this.filter, callback = this.callback}) {
+  setup({
+      prefix = "",
+      headers = this.headers,
+      filter = this.filter,
+      callback = this.callback,
+      cookies = this.cookies,
+      ...option
+    }) {
     this.prefix = prefix;
-    this.header = header;
+    this.headers = headers;
     this.filter = filter;
     this.callback = callback;
+    this.cookies = cookies;
+    this.option = option;
   }
 
-  setHeader(header = {}) {
-    this.header = {...this.header, ...header};
+  setHeaders(headers = {}) {
+    this.headers = {...this.headers, ...headers};
   }
 
-  get(url, param, header = {}) {
-    return this[http](`${url}?${stringify(param)}`, {}, header);
+  get(url, param, headers = {}) {
+    return this[http](`${url}?${stringify(param)}`, {}, headers);
   }
 
-  post(url, param, header = {}) {
-    return this[http](url, {method: 'POST', body: stringify(param)}, header);
+  post(url, param, headers = {}) {
+    return this[http](url, {method: 'POST', body: stringify(param)}, headers);
   }
 
-  put(url, param, header = {}) {
-    return this[http](url, {method: 'PUT', body: stringify(param)}, header);
+  put(url, param, headers = {}) {
+    return this[http](url, {method: 'PUT', body: stringify(param)}, headers);
   }
 
-  delete(url, param, header = {}) {
-    return this[http](`${url}?${stringify(param)}`, {method: 'DELETE'}, header);
+  delete(url, param, headers = {}) {
+    return this[http](`${url}?${stringify(param)}`, {method: 'DELETE'}, headers);
   }
 
-  options(url, param, header = {}) {
-    return this[http](url, {method: 'OPTIONS'}, header);
+  options(url, param, headers = {}) {
+    return this[http](url, {method: 'OPTIONS'}, headers);
   }
 
-  json(url, param = {}, header) {
-    return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...header, "Content-Type": "application/json"});
+  json(url, param = {}, headers) {
+    return this[http](url, {method: 'POST', body: JSON.stringify(param)}, {...headers, "Content-Type": "application/json"});
   }
 }
 
