@@ -25,18 +25,18 @@ return http.get('url', param, header);
 
 全局配置
 
-> #### prefix
+  #### prefix
   请求 url 前缀
   
-> #### headers
+  #### headers
 
   配置请求头
   
-> #### cookies
+  #### cookies
 
   是否携带cookies
   
-> #### filter
+  #### filter
 
   过滤函数，发生在请求发出之前，可以对url, headers，fetch option进行更改，类型为 Promise function。
   
@@ -57,7 +57,7 @@ return http.get('url', param, header);
     })
   });
   ```
-> #### callback
+  #### callback
 
   回调数据函数，对请求成功获取到的数据进行预处理
   
