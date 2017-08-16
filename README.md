@@ -105,6 +105,16 @@ delete 方法，一般用于数据删除
 ### options
 option 方法，一般用于请求时的预检
   
+## Defalut headers
+"Content-Type": "application/x-www-form-urlencoded",
+
+"Access-Control-Allow-Origin": "*",
+
+"Access-Control-Max-Age": "86400",
+
+"Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+
+"Access-Control-Allow-Headers": "token, host, x-real-ip, x-forwarded-ip, accept, content-type",
 
 ## Links
 
